@@ -1,0 +1,54 @@
+<html>
+<head>
+	<script src="jquery-3.1.1.min.js"></script>
+</head>
+</body>
+	<h1>Search Tweets POC</h1>
+	<form id="id1"> 
+		<input type="text" id = "id2"/>
+	</form>
+	<p id = "abc"></p>
+</body>
+	<script type="text/javascript">
+		$("#id2").keyup(function(){
+			var sort = "\"sort\" : [" +
+        			   "{ \"@timestamp\" : {\"order\" : \"desc\"}}," +
+        			   "\"_score\"],";
+		    var query = "\"query\": {" +
+      				    "\"match\" : {" +
+            			"\"message\" : \"" + $("#id2").val() + "\"" +
+        				"}}," +
+        				"\"highlight\" : {" +
+        				"\"pre_tags\" : [\"<mark>\"]," +
+        				"\"post_tags\" : [\"</mark>\"]," +
+        				"\"fields\" : {" +
+           				"\"message\" : {}" +
+        				"}}" +	
+        				"}";
+        	var data = "{" + sort + query;
+			$.ajax({
+			  method: "POST",
+			  url: "http://localhost:9200/_search",
+			  crossDomain: true,
+			  data: data,
+			  success: function(xhr) {
+			  		var hits = xhr.hits.total;
+			  		if(hits > 0) {
+			  		if(hits>10) {
+			  			hits =10;
+			  		}
+			  		var i = 0;
+			  		var str = "";
+			  		for(i=0;i<hits;i++) {
+
+			  			str = str + xhr.hits.hits[i].highlight.message[0] + "<br/>";
+			  		}
+			  		$("#abc").html(str);
+			  	} else {
+			  		$("#abc").html("");	
+			  	}
+			  }
+			})
+			});
+	</script>
+</html>
